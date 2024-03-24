@@ -4,12 +4,14 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
 
 from rest_framework import status
+from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from token_tome.models import Student
-from token_tome.serializers import StudentSerializer
+from django.contrib.auth.models import User
+from token_tome.serializers import StudentSerializer, UserSerializer
 # Create your views here.
 
 
@@ -67,3 +69,13 @@ class SingleStudent(APIView):
             return JsonResponse(serializer.data)
         return JsonResponse(serializer.errors,
                             status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserList(generics.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+
+class UserDetail(generics.RetrieveAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
