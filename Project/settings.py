@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'rest_framework',
     'token_tome.apps.TokenTomeConfig',
     'django.contrib.admin',
     'django.contrib.auth',
