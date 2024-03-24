@@ -4,6 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
 
 from rest_framework import status
+from rest_framework.views import APIView
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
@@ -18,16 +19,16 @@ def index(request):
 
 @csrf_exempt
 @api_view
-def user_list(request):
+class UserList(APIView):
     """
     List all users, or create a new user.
     """
-    if request.method == 'GET':
+    def get(self, request):
         users = User.objects.all()
         serializer = UserSerializer(users, many=True)
         return JsonResponse(serializer.data, safe=False)
 
-    elif request.method == 'POST':
+    def post(self, request):
         data = JSONParser().parse(request)
         serializer = UserSerializer(data=data)
         if serializer.is_valid():
@@ -40,21 +41,22 @@ def user_list(request):
 
 @csrf_exempt
 @api_view
-def single_user(request, username):
+class SingleUser(APIView):
     """
     Retrieve, update or delete a user's information.
     """
     # check if the user exists
-    try:
-        user = User.objects.get(username=username)
-    except User.DoesNotExist:
-        return HttpResponse(status=status.HTTP_404_NOT_FOUND)
+    def try_get(self, username):
+        try:
+            self.user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            return HttpResponse(status=status.HTTP_404_NOT_FOUND)
 
-    if request.method == 'GET':
-        serializer = UserSerializer(user)
+    def get(self, request):
+        serializer = UserSerializer(self.user)
         return JsonResponse(serializer.data)
 
-    elif request.method == 'POST':
+    def post(self, request):
         data = JSONParser().parse(request)
         serializer = UserSerializer(data=data)
 
@@ -65,7 +67,3 @@ def single_user(request, username):
             return JsonResponse(serializer.data)
         return JsonResponse(serializer.errors,
                             status=status.HTTP_400_BAD_REQUEST)
-
-    elif request.method == 'DELETE':
-        user.delete()
-        return HttpResponse(status=status.HTTP_204_NO_CONTENT)
