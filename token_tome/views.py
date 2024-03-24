@@ -8,8 +8,8 @@ from rest_framework.views import APIView
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from token_tome.models import User
-from token_tome.serializers import UserSerializer
+from token_tome.models import Student
+from token_tome.serializers import StudentSerializer
 # Create your views here.
 
 
@@ -19,18 +19,18 @@ def index(request):
 
 @csrf_exempt
 @api_view
-class UserList(APIView):
+class StudentList(APIView):
     """
     List all users, or create a new user.
     """
     def get(self, request):
-        users = User.objects.all()
-        serializer = UserSerializer(users, many=True)
+        users = Student.objects.all()
+        serializer = StudentSerializer(users, many=True)
         return JsonResponse(serializer.data, safe=False)
 
     def post(self, request):
         data = JSONParser().parse(request)
-        serializer = UserSerializer(data=data)
+        serializer = StudentSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             return JsonResponse(serializer.data,
@@ -41,24 +41,24 @@ class UserList(APIView):
 
 @csrf_exempt
 @api_view
-class SingleUser(APIView):
+class SingleStudent(APIView):
     """
     Retrieve, update or delete a user's information.
     """
     # check if the user exists
-    def try_get(self, username):
+    def try_get(self, name):
         try:
-            self.user = User.objects.get(username=username)
-        except User.DoesNotExist:
+            self.student = Student.objects.get(name=name)
+        except Student.DoesNotExist:
             return HttpResponse(status=status.HTTP_404_NOT_FOUND)
 
     def get(self, request):
-        serializer = UserSerializer(self.user)
+        serializer = StudentSerializer(self.student)
         return JsonResponse(serializer.data)
 
     def post(self, request):
         data = JSONParser().parse(request)
-        serializer = UserSerializer(data=data)
+        serializer = StudentSerializer(data=data)
 
         # check if all the fields have been filled
         # before saving to the database

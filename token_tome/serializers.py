@@ -1,8 +1,8 @@
 from rest_framework import serializers
-from token_tome.models import User
+from token_tome.models import Student
 
 
-class UserSerializer(serializers.ModelSerializer):
+class StudentSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
+        model = Student
         fields = ['id', 'username', 'token']
