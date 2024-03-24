@@ -7,5 +7,4 @@ from django.db import models
 class User(models.Model):
     username = models.CharField(max_length=200)
     token = models.CharField(max_length=100,
-                             unique=True,
-                             editable=False)
+                             unique=True)
