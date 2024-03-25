@@ -21,7 +21,7 @@ def index(request):
     return HttpResponse("Hello, world!")
 
 
-@api_view
+@api_view(['GET'])
 def api_root(request, format=None):
     return Response({
         'users': reverse('user-list', request=request, format=format),
@@ -34,19 +34,22 @@ class StudentHighlight(generics.GenericAPIView):
     renderer_classes = [renderers.StaticHTMLRenderer]
 
     def get(self, request, *args, **kwargs):
-        snippet = self.get_object()
-        return Response(snippet.highlighted)
+        student = self.get_object()
+        return Response(student.highlighted)
 
 
 #@csrf_exempt
 #@api_view
-class StudentList(APIView):
+class StudentList(generics.ListCreateAPIView):
     """
     List all users, or create a new user.
     """
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    name = 'student-list'
 
-    def get(self, request):
+    queryset = Student.objects.all()
+    serializer_class = StudentSerializer
+    ''''def get(self, request):
         users = Student.objects.all()
         serializer = StudentSerializer(users, many=True)
         return JsonResponse(serializer.data, safe=False)
@@ -60,19 +63,33 @@ class StudentList(APIView):
                                 status=status.HTTP_201_CREATED)
         return JsonResponse(serializer.errors,
                             status=status.HTTP_400_BAD_REQUEST)
+'''
 
 
 #@csrf_exempt
 #@api_view
-class SingleStudent(APIView):
+class StudentDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     Retrieve, update or delete a user's information.
     """
-
+    queryset = Student.objects.all()
+    serializer_class = StudentSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    name = 'student-detail'
+    filter_backends = ['name']
+
+    def get_object(self):
+        queryset = self.get_queryset()
+        filter = {}
+        for field in self.multiple_lookup_fields:
+            filter[field] = self.kwargs[field]
+
+        obj = self.get_object_or_404(queryset, **filter)
+        self.check_object_permissions(self.request, obj)
+        return obj
 
     # check if the user exists
-    def try_get(self, name):
+    '''def try_get(self, name):
         try:
             self.student = Student.objects.get(name=name)
         except Student.DoesNotExist:
@@ -93,13 +110,37 @@ class SingleStudent(APIView):
             return JsonResponse(serializer.data)
         return JsonResponse(serializer.errors,
                             status=status.HTTP_400_BAD_REQUEST)
+'''
+
+
+class StudentName(generics.RetrieveUpdateDestroyAPIView):
+    """
+    Retrieve, update or delete a user's information.
+    """
+    queryset = Student.objects.all()
+    serializer_class = StudentSerializer
+    lookup_field = Student.name
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    name = 'student-name'
 
 
 class UserList(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    name = 'user-list'
 
 
-class SingleUser(generics.RetrieveAPIView):
+class UserDetail(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    name = 'user-detail'
+
+
+class UserHighlight(generics.GenericAPIView):
+    queryset = Student.objects.all()
+    renderer_classes = [renderers.StaticHTMLRenderer]
+    name = 'user-highlight'
+
+    def get(self, request, *args, **kwargs):
+        user = self.get_object()
+        return Response(user.highlighted)
