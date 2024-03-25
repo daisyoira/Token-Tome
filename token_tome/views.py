@@ -5,6 +5,7 @@ from rest_framework.parsers import JSONParser
 
 from rest_framework import status
 from rest_framework import generics
+from rest_framework import permissions
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -19,12 +20,14 @@ def index(request):
     return HttpResponse("Hello, world!")
 
 
-@csrf_exempt
-@api_view
+#@csrf_exempt
+#@api_view
 class StudentList(APIView):
     """
     List all users, or create a new user.
     """
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
     def get(self, request):
         users = Student.objects.all()
         serializer = StudentSerializer(users, many=True)
@@ -41,12 +44,15 @@ class StudentList(APIView):
                             status=status.HTTP_400_BAD_REQUEST)
 
 
-@csrf_exempt
-@api_view
+#@csrf_exempt
+#@api_view
 class SingleStudent(APIView):
     """
     Retrieve, update or delete a user's information.
     """
+
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
     # check if the user exists
     def try_get(self, name):
         try:
