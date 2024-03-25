@@ -5,7 +5,7 @@ from rest_framework.parsers import JSONParser
 
 from rest_framework import status
 from rest_framework import generics
-from rest_framework import permissions
+from rest_framework import permissions, renderers
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -18,6 +18,15 @@ from token_tome.serializers import StudentSerializer, UserSerializer
 
 def index(request):
     return HttpResponse("Hello, world!")
+
+
+class StudentHighlight(generics.GenericAPIView):
+    queryset = Student.objects.all()
+    renderer_classes = [renderers.StaticHTMLRenderer]
+
+    def get(self, request, *args, **kwargs):
+        snippet = self.get_object()
+        return Response(snippet.highlighted)
 
 
 #@csrf_exempt
