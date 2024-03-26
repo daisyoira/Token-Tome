@@ -46,7 +46,7 @@ class StudentList(generics.ListCreateAPIView):
     """
     List all users, or create a new user.
     """
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated]
     name = 'student-list'
 
     queryset = Student.objects.all()
@@ -63,7 +63,7 @@ class StudentDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     queryset = Student.objects.all()
     serializer_class = StudentSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated]
     name = 'student-detail'
 
     # check if the user exists
@@ -105,12 +105,14 @@ class StudentName(generics.RetrieveUpdateDestroyAPIView):
 class UserList(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated]
     name = 'user-list'
 
 
 class UserDetail(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated]
     name = 'user-detail'
 
 
