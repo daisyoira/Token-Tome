@@ -14,6 +14,8 @@ from rest_framework.reverse import reverse
 from token_tome.models import Student
 from django.contrib.auth.models import User
 from token_tome.serializers import StudentSerializer, UserSerializer
+
+from rest_framework import filters
 # Create your views here.
 
 
@@ -49,21 +51,8 @@ class StudentList(generics.ListCreateAPIView):
 
     queryset = Student.objects.all()
     serializer_class = StudentSerializer
-    ''''def get(self, request):
-        users = Student.objects.all()
-        serializer = StudentSerializer(users, many=True)
-        return JsonResponse(serializer.data, safe=False)
-
-    def post(self, request):
-        data = JSONParser().parse(request)
-        serializer = StudentSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data,
-                                status=status.HTTP_201_CREATED)
-        return JsonResponse(serializer.errors,
-                            status=status.HTTP_400_BAD_REQUEST)
-'''
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['name', 'token']
 
 
 #@csrf_exempt
@@ -76,17 +65,6 @@ class StudentDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = StudentSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     name = 'student-detail'
-    filter_backends = ['name']
-
-    def get_object(self):
-        queryset = self.get_queryset()
-        filter = {}
-        for field in self.multiple_lookup_fields:
-            filter[field] = self.kwargs[field]
-
-        obj = self.get_object_or_404(queryset, **filter)
-        self.check_object_permissions(self.request, obj)
-        return obj
 
     # check if the user exists
     '''def try_get(self, name):
