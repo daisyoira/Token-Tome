@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, re_path
 
 from . import views
 
@@ -10,5 +10,6 @@ urlpatterns = [
     path('students/<slug:pk>/highlight/', views.StudentHighlight.as_view(), name="student-highlight"),
     path("users/", views.UserList.as_view(), name="user-list"),
     path("users/<slug:pk>", views.UserDetail.as_view(), name="user-detail"),
-    path('users/<slug:pk>/highlight/', views.UserHighlight.as_view(), name="user-highlight")
+    path('users/<slug:pk>/highlight/', views.UserHighlight.as_view(), name="user-highlight"),
+    re_path(r'^upload/(?P<filename>[^/]+)$', views.FileUploadView.as_view(), name='file_upload')
 ]
