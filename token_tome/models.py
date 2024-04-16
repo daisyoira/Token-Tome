@@ -10,3 +10,13 @@ class Student(models.Model):
                              unique=True,
                              editable=False,
                              default=secrets.token_urlsafe(7))
+
+
+class File(models.Model):
+    file_path = models.FileField(max_length=2000)
+    token = models.CharField(max_length=100)
+
+    # stop creation of table in database
+    class Meta:
+        managed = False
+

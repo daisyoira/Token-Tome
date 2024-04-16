@@ -10,11 +10,11 @@ from rest_framework.views import APIView
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
-from rest_framework.parsers import FileUploadParser
+from rest_framework.parsers import MultiPartParser
 
 from token_tome.models import Student
 from django.contrib.auth.models import User
-from token_tome.serializers import StudentSerializer, UserSerializer
+from token_tome.serializers import StudentSerializer, UserSerializer, FileUploadSerializer
 
 from rest_framework import filters
 # Create your views here.
@@ -28,7 +28,8 @@ def index(request):
 def api_root(request, format=None):
     return Response({
         'users': reverse('user-list', request=request, format=format),
-        'students': reverse('student-list', request=request, format=format)
+        'students': reverse('student-list', request=request, format=format),
+        'upload': reverse('file_upload', request=request, format=format)
     })
 
 
@@ -41,10 +42,11 @@ class StudentHighlight(generics.GenericAPIView):
         return Response(student.highlighted)
 
 
-class FileUploadView(APIView):
-    parser_classes = [FileUploadParser]
+class FileUploadView(generics.CreateAPIView):
+    parser_classes = [MultiPartParser]
+    serializer_class = FileUploadSerializer
 
-    def put(self, request, filename, format=None):
+    def post(self, request, filename, format=None):
         file_obj = request.data['file']
         # ...
         # do some stuff with uploaded file

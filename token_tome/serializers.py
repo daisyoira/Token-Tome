@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from token_tome.models import Student
+from token_tome.models import Student, File
 from django.contrib.auth.models import User
 
 
@@ -15,3 +15,10 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
         fields = ['url', 'id', 'username']
+
+
+class FileUploadSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = File
+        fields = ['file_path', 'token']
