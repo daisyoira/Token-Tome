@@ -10,6 +10,7 @@ from rest_framework.views import APIView
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
+from rest_framework.parsers import FileUploadParser
 
 from token_tome.models import Student
 from django.contrib.auth.models import User
@@ -38,6 +39,17 @@ class StudentHighlight(generics.GenericAPIView):
     def get(self, request, *args, **kwargs):
         student = self.get_object()
         return Response(student.highlighted)
+
+
+class FileUploadView(APIView):
+    parser_classes = [FileUploadParser]
+
+    def put(self, request, filename, format=None):
+        file_obj = request.data['file']
+        # ...
+        # do some stuff with uploaded file
+        # ...
+        return Response(status=204)
 
 
 #@csrf_exempt
