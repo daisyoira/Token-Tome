@@ -52,9 +52,11 @@ class FileUploadView(generics.CreateAPIView):
         if serializer.is_valid():
 
             uploaded_file = serializer.validated_data["file_path"]
-            return Response(status=204)
+            return Response(data=serializer.data,
+                            status=204)
 
-        return Response(status=400)
+        return Response(data=serializer.errors,
+                        status=400)
 
 
 #@csrf_exempt
