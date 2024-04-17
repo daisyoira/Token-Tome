@@ -46,6 +46,7 @@ class StudentHighlight(generics.GenericAPIView):
 class FileUploadView(generics.CreateAPIView):
     parser_classes = [MultiPartParser]
     serializer_class = FileUploadSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
