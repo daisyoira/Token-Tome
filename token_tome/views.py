@@ -42,16 +42,19 @@ class StudentHighlight(generics.GenericAPIView):
         return Response(student.highlighted)
 
 
+# Source: https://backendengineer.io/django-rest-framework-file-upload-api/
 class FileUploadView(generics.CreateAPIView):
     parser_classes = [MultiPartParser]
     serializer_class = FileUploadSerializer
 
-    def post(self, request, filename, format=None):
-        file_obj = request.data['file']
-        # ...
-        # do some stuff with uploaded file
-        # ...
-        return Response(status=204)
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+
+            uploaded_file = serializer.validated_data["file_path"]
+            return Response(status=204)
+
+        return Response(status=404)
 
 
 #@csrf_exempt
