@@ -39,7 +39,16 @@ h3{
     padding: 5px 0 5px 0;
 }
 
-input[type="submit"]{
+.form-container{
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+}
+
+
+input[type="submit"], input[type="file"]{
     border: 0.15em solid black;
     min-width: 60px;
     text-align: center;
@@ -48,26 +57,26 @@ input[type="submit"]{
     margin-top: 0.5em;
 }
 
-input[type="submit"]:hover{
+input[type="submit"]:hover, input[type="file"]:hover{
     box-shadow: 3px 3px 3px grey;
 }
 
-input[type="submit"]:active{
+input[type="submit"]:active, input[type="file"]:active{
     box-shadow: -2px -2px 2px grey;
 }
 
-fieldset{
+/*fieldset{
     border: 0;
     display: block;
     margin: 5px 0;
-}
+}*/
 
-legend, input[type="text"], .error-msg{
+input[type="text"], select{
     width: 250px;
 }
 
 p{
-    margin: 5px 0;
+    margin: 2px 0;
     padding: 0 2px;
     text-align: center;
 }
