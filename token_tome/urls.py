@@ -3,7 +3,8 @@ from django.urls import path, re_path
 from . import views
 
 urlpatterns = [
-    path("", views.api_root, name="index"),
+    path("", views.FileUploadFormView.as_view(), name="upload"),
+    path("api", views.api_root, name="index"),
     path("students/", views.StudentList.as_view(), name="student-list"),
     path("students/<slug:pk>", views.StudentDetail.as_view(), name="student-detail"),
     path("students/<slug:name>", views.StudentName.as_view(), name="student-name"),
