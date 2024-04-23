@@ -24,17 +24,19 @@ a:hover{
     color: tomato;
 }
 
+.page-header, .page-title{
+    padding-bottom: 2%;
+    text-align: center;
+}
 
 .page-header{
     position: relative;
     top: 0;
-    padding-bottom: 2%;
-    text-align: center;
     border-bottom: 0.15em solid black;
     margin: 10px;
 }
 
-h1{
+h1, h3{
     display: inline-block;
     text-align: center;
 }
@@ -43,10 +45,14 @@ h1, h3{
     font-weight: 400;
 }
 
+/*
 h3{
+
     margin: 0;
     padding: 5px 0 5px 0;
 }
+*/
+
 
 .form-container{
     display: flex;
