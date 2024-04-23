@@ -21,4 +21,4 @@ class FileUploadSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = File
-        fields = ['file_path', 'token']
+        fields = '__all__'
