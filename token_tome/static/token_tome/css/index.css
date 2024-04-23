@@ -21,8 +21,8 @@ body{
     top: 0%;
     padding-bottom: 2%;
 
-    display: grid;
-    grid-template-columns: 1fr 2fr;
+    /*display: grid;
+    grid-template-columns: 2fr 2fr;*/
 
     border-bottom: 0.15em solid black;
     margin: 10px;
@@ -42,7 +42,7 @@ h3{
     padding: 5px 0 5px 0;
 }
 
-button{
+input[type="submit"]{
     border: 0.15em solid black;
     min-width: 60px;
     text-align: center;
@@ -51,17 +51,12 @@ button{
     margin-top: 0.5em;
 }
 
-button:hover{
+input[type="submit"]:hover{
     box-shadow: 3px 3px 3px grey;
 }
 
-button:active{
+input[type="submit"]:active{
     box-shadow: -2px -2px 2px grey;
-}
-
-.header-buttons > button{
-    min-width: 10rem;
-    display: block;
 }
 
 fieldset{
