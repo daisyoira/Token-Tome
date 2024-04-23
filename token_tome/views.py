@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.parsers import JSONParser
+from django.views.generic.edit import FormView, CreateView
 
 from rest_framework import status
 from rest_framework import generics
@@ -15,6 +15,8 @@ from rest_framework.parsers import MultiPartParser
 from token_tome.models import Student
 from django.contrib.auth.models import User
 from token_tome.serializers import StudentSerializer, UserSerializer, FileUploadSerializer
+from token_tome.forms import FileUploadForm
+
 
 from rest_framework import filters
 # Create your views here.
@@ -31,6 +33,20 @@ def api_root(request, format=None):
         'students': reverse('student-list', request=request, format=format),
         'upload': reverse('file_upload', request=request, format=format)
     })
+
+
+class StudentCreateView(CreateView):
+    model = Student
+    fields = ["name"]
+
+
+class FileUploadFormView(FormView):
+    template_name = 'upload.html'
+    form_class = FileUploadForm
+    success_url = '/thanks/'
+
+    def form_valid(self, form):
+        return super().form_valid(form)
 
 
 class StudentHighlight(generics.GenericAPIView):
