@@ -13,8 +13,11 @@ class Student(models.Model):
 
 
 class File(models.Model):
+    TOKEN_CHOICES = [(student.token, student.name) for student in Student.objects.all()]
     file_path = models.FileField(max_length=2000)
-    token = models.CharField(max_length=100)
+    student = models.CharField(max_length=100,
+                               choices=TOKEN_CHOICES,
+                               default=TOKEN_CHOICES[0])
 
     # stop creation of table in database
     class Meta:
