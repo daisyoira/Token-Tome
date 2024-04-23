@@ -4,6 +4,7 @@ from . import views
 
 urlpatterns = [
     path("", views.FileUploadFormView.as_view()),
+    path("create-student", views.StudentCreateView.as_view()),
     path("api", views.api_root, name="index"),
     path("students/", views.StudentList.as_view(), name="student-list"),
     path("students/<slug:pk>", views.StudentDetail.as_view(), name="student-detail"),
