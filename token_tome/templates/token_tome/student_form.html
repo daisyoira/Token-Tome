@@ -1,14 +1,19 @@
 {% extends 'base.html' %}
 
 {% block content %}
+    <div>
+        <p class="page-title">
+            <h3> Add a New Student</h3>
+        </p>
 
-    <div class="form-container">
+        <div class="form-container">
         <form method="POST" enctype="application/x-www-form-urlencoded">
             {% csrf_token %}
             {{ form.as_p }}
             <input type="submit" value="Create">
         </form>
         <a href="/"> Protect a file?</a>
+        </div>
     </div>
 
 {% endblock content %}

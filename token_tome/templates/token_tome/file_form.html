@@ -1,7 +1,9 @@
 {% extends 'base.html' %}
 {% block content %}
     <div class="form-container">
-        <p>File Upload Form</p>
+        <p class="page-title">
+            <h3>File Upload</h3>
+        </p>
         <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             {{ form.as_p }}
