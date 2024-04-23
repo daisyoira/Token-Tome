@@ -2,7 +2,7 @@
 
 {% block content %}
 
-    <div>
+    <div class="form-container">
         <form method="POST" enctype="application/x-www-form-urlencoded">
             {% csrf_token %}
             {{ form.as_p }}
