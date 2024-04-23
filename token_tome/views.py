@@ -37,11 +37,10 @@ def api_root(request, format=None):
 
 class StudentCreateView(CreateView):
     model = Student
-    fields = ["name"]
+    fields = '__all__'
 
 
 class FileUploadFormView(CreateView):
-    #template_name = 'upload.html'
     model = File
     fields = '__all__'
 
