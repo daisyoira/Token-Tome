@@ -12,7 +12,7 @@ from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.parsers import MultiPartParser
 
-from token_tome.models import Student
+from token_tome.models import Student, File
 from django.contrib.auth.models import User
 from token_tome.serializers import StudentSerializer, UserSerializer, FileUploadSerializer
 from token_tome.forms import FileUploadForm
@@ -40,10 +40,10 @@ class StudentCreateView(CreateView):
     fields = ["name"]
 
 
-class FileUploadFormView(FormView):
-    template_name = 'upload.html'
-    form_class = FileUploadForm
-    success_url = '/thanks/'
+class FileUploadFormView(CreateView):
+    #template_name = 'upload.html'
+    model = File
+    fields = '__all__'
 
     def form_valid(self, form):
         return super().form_valid(form)
