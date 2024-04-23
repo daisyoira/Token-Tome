@@ -20,10 +20,7 @@ body{
     position: relative;
     top: 0%;
     padding-bottom: 2%;
-
-    /*display: grid;
-    grid-template-columns: 2fr 2fr;*/
-
+    text-align: center;
     border-bottom: 0.15em solid black;
     margin: 10px;
 }
