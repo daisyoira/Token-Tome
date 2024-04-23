@@ -1,15 +1,18 @@
 {% extends 'base.html' %}
 {% block content %}
-    <div class="form-container">
-        <p class="page-title">
+    <div>
+        <div class="page-title">
             <h3>File Upload</h3>
-        </p>
-        <form method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <input type="submit" value="Upload">
-        </form>
+        </div>
+        <div class="form-container">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input type="submit" value="Upload">
+            </form>
 
-    <a href="create-student"> Create a new student?</a>
+        <a href="create-student"> Create a new student?</a>
+        </div>
     </div>
+
 {% endblock content %}
