@@ -6,12 +6,12 @@ urlpatterns = [
     path("", views.FileUploadFormView.as_view()),
     path("create-student", views.StudentCreateView.as_view()),
     path("api", views.api_root, name="index"),
-    path("students/", views.StudentList.as_view(), name="student-list"),
-    path("students/<slug:pk>", views.StudentDetail.as_view(), name="student-detail"),
-    path("students/<slug:name>", views.StudentName.as_view(), name="student-name"),
-    path('students/<slug:pk>/highlight/', views.StudentHighlight.as_view(), name="student-highlight"),
-    path("users/", views.UserList.as_view(), name="user-list"),
-    path("users/<slug:pk>", views.UserDetail.as_view(), name="user-detail"),
-    path('users/<slug:pk>/highlight/', views.UserHighlight.as_view(), name="user-highlight"),
-    path('upload/', views.FileUploadView.as_view(), name='file_upload')
+    path("api/students/", views.StudentList.as_view(), name="student-list"),
+    path("api/students/<slug:pk>", views.StudentDetail.as_view(), name="student-detail"),
+    path("api/students/<slug:name>", views.StudentName.as_view(), name="student-name"),
+    path('api/students/<slug:pk>/highlight/', views.StudentHighlight.as_view(), name="student-highlight"),
+    path("api/users/", views.UserList.as_view(), name="user-list"),
+    path("api/users/<slug:pk>", views.UserDetail.as_view(), name="user-detail"),
+    path('api/users/<slug:pk>/highlight/', views.UserHighlight.as_view(), name="user-highlight"),
+    path('api/upload/', views.FileUploadView.as_view(), name='file_upload')
 ]
