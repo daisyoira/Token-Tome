@@ -11,6 +11,10 @@ class Student(models.Model):
                              editable=False,
                              default=secrets.token_urlsafe(7))
 
+    def save(self, *args, **kwargs):
+        self.token = secrets.token_urlsafe(7)
+        super(Student, self).save(*args, **kwargs)
+
 
 class File(models.Model):
     TOKEN_CHOICES = [(student.token, student.name) for student in Student.objects.all()]
