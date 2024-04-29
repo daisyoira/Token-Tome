@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic.edit import FormView, CreateView
+from django.views.generic import DetailView, CreateView, FormView
+from django.conf import settings
 
 from rest_framework import status
 from rest_framework import generics
@@ -13,10 +14,15 @@ from rest_framework.reverse import reverse
 from rest_framework.parsers import MultiPartParser
 
 from token_tome.models import Student, File
+from token_tome.forms import FileUploadForm
 from django.contrib.auth.models import User
 from token_tome.serializers import StudentSerializer, UserSerializer, FileUploadSerializer
 from token_tome.forms import FileUploadForm
 
+from io import BytesIO, StringIO
+from fpdf import FPDF
+from pypdf import PdfWriter, PdfReader, Transformation
+import os
 
 from rest_framework import filters
 # Create your views here.
@@ -37,15 +43,19 @@ def api_root(request, format=None):
 
 class StudentCreateView(CreateView):
     model = Student
+    fields = ['name']
+    success_url = 'create-student'
+
+
+class StudentDetailView(DetailView):
+    model = Student
     fields = '__all__'
 
 
-class FileUploadFormView(CreateView):
-    model = File
-    fields = '__all__'
-
-    def form_valid(self, form):
-        return super().form_valid(form)
+class FileUploadFormView(FormView):
+    form_class = FileUploadForm
+    template_name = 'token_tome/file_form.html'
+    success_url = 'create-student'
 
 
 class StudentHighlight(generics.GenericAPIView):
@@ -68,7 +78,53 @@ class FileUploadView(generics.CreateAPIView):
         if serializer.is_valid():
 
             uploaded_file = serializer.validated_data["file_path"]
-            return Response(data=serializer.data,
+
+            watermark_pdf = FPDF()
+            watermark_pdf.set_font('Helvetica', 'B', 20)
+            watermark_pdf.add_page()
+
+            # add token to pdf to be used as watermark
+            # set opacity to 0, so it's invisible
+            with watermark_pdf.local_context(fill_opacity=0.25):
+                watermark_pdf.text(x=50, y=50, text=serializer.validated_data["student"])
+
+            with watermark_pdf.local_context(fill_opacity=0):
+                watermark_pdf.text(x=100, y=50, text=serializer.validated_data["student"])
+            #save_watermark = BytesIO()
+            #save_to_folder = watermark_pdf.output(name=os.path.join(settings.MEDIA_ROOT,
+
+            # save the pdf to be used for watermarking as
+            # a bytestring in memory
+            watermark_byte_string = watermark_pdf.output(dest='S')
+            saved_watermark = BytesIO(watermark_byte_string)
+
+            # get the first page of the pdf to be used
+            # as a watermark
+            stamp = PdfReader(saved_watermark).pages[0]
+
+            # write to the uploaded pdf
+            writer = PdfWriter(clone_from=serializer.validated_data["file_path"])
+            #reader = PdfReader(serializer.validated_data["file_path"])
+
+            #writer.append(reader, pages=reader.page)
+
+            # loop through the pages in the uploaded pdf
+            # and add the watermark to every page
+            for page in writer.pages:
+                page.merge_page(stamp, over=True)
+
+            # save the watermarked pdf to the media directory
+            # in the project
+            path = os.path.join(settings.MEDIA_ROOT,
+                                'watermark_'+serializer.validated_data["file_path"].name)
+            writer.write(path)
+
+            data = {
+                "file_path": path,
+                "student": serializer.validated_data["student"]
+            }
+
+            return Response(data=data,
                             status=204)
 
         return Response(data=serializer.errors,
