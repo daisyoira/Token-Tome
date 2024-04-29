@@ -1,8 +1,9 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import DetailView, CreateView, FormView
+from django.views.generic import DetailView, CreateView, FormView, TemplateView
 from django.conf import settings
+from django.shortcuts import redirect
 
 from rest_framework import status
 from rest_framework import generics
@@ -82,8 +83,13 @@ def watermark(data):
                         'watermark_' + data["file"].name)
     writer.write(path)
 
+    file_name = 'watermark_'
+    no_ext = data["file"].name.split('.')[0]
+    file_name += no_ext
+
     data = {
         "file_path": path,
+        "file_name": file_name,
         "student": data["student"]
     }
 
@@ -110,15 +116,28 @@ class StudentDetailView(DetailView):
 class FileUploadFormView(FormView):
     form_class = FileUploadForm
     template_name = 'token_tome/file_form.html'
-    success_url = 'create-student'
+
+    def __init__(self, *args, **kwargs):
+        super(FileUploadFormView, self).__init__(*args, **kwargs)
+
+        self.file_name = None
 
     def form_valid(self, form):
         data = {
             'file': form.cleaned_data['file'],
             'student': form.cleaned_data['student'].token
         }
-        watermark(data)
+        response_data = watermark(data)
+        self.file_name = response_data.data['file_name']
         return super(FileUploadFormView, self).form_valid(form)
+
+    def get_success_url(self):
+        return reverse('download', kwargs={'file_name': self.file_name})
+
+
+class FileDownloadView(TemplateView):
+    template_name = 'token_tome/download.html'
+    context_object_name = 'file'
 
 
 class StudentHighlight(generics.GenericAPIView):
