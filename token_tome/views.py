@@ -44,12 +44,17 @@ def api_root(request, format=None):
 class StudentCreateView(CreateView):
     model = Student
     fields = ['name']
-    success_url = 'create-student'
+
+    # get primary key and redirect to individual student
+    # page
+    def get_success_url(self):
+        return reverse('student-token', kwargs={'pk': self.object.pk})
 
 
 class StudentDetailView(DetailView):
     model = Student
     fields = '__all__'
+    context_object_name = 'student'
 
 
 class FileUploadFormView(FormView):
