@@ -116,34 +116,6 @@ class FileUploadWithAuth(APITestCase):
         self.client.login(username=self.username,
                           password=self.password)
 
-    '''def test_upload_file_all_fields(self):
-        """
-        Ensure we can upload a file & token.
-        """
-        pdf = FPDF()
-        pdf.set_font('Helvetica', 'B', 20)
-        pdf.add_page()
-        pdf.text(x=50, y=50, text='Unit Test PDF')
-
-        pdf_byte_string = pdf.output(dest='S')
-        final_pdf = BytesIO(pdf_byte_string)
-
-        url = reverse('file_upload')
-        with open('test_pdf.pdf', 'rb') as infile:
-            #_file = SimpleUploadedFile( )
-
-            local_file = SimpleUploadedFile('test_pdf.pdf',
-                                            infile.read())
-            #local_file.save('test_pdf.pdf', File(open('test_pdf.pdf', 'rb')))
-            #with open('test_pdf.pdf') as f1:
-            data = {'file': local_file,
-                    'student': 'test_token'}
-            response = self.client.post(url, data, format='multipart')
-            response.render()
-            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-            self.assertEqual({'student': response.data['student']},
-                             {'student': data['student']})
-    '''
     def test_upload_file_missing_file(self):
         """
         Ensure we can't upload a file without
