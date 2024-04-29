@@ -1,28 +1,23 @@
-from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse
-from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponse
 from django.views.generic import DetailView, CreateView, FormView, TemplateView
 from django.conf import settings
-from django.shortcuts import redirect
 
-from rest_framework import status
+
 from rest_framework import generics
 from rest_framework import permissions, renderers
-from rest_framework.views import APIView
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.parsers import MultiPartParser
 
-from token_tome.models import Student, File
-from token_tome.forms import FileUploadForm
+from token_tome.models import Student
 from django.contrib.auth.models import User
 from token_tome.serializers import StudentSerializer, UserSerializer, FileUploadSerializer
 from token_tome.forms import FileUploadForm
 
-from io import BytesIO, StringIO
+from io import BytesIO
 from fpdf import FPDF
-from pypdf import PdfWriter, PdfReader, Transformation
+from pypdf import PdfWriter, PdfReader
 import os
 
 from rest_framework import filters
@@ -188,30 +183,6 @@ class StudentDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = StudentSerializer
     permission_classes = [permissions.IsAuthenticated]
     name = 'student-detail'
-
-    # check if the user exists
-    '''def try_get(self, name):
-        try:
-            self.student = Student.objects.get(name=name)
-        except Student.DoesNotExist:
-            return HttpResponse(status=status.HTTP_404_NOT_FOUND)
-
-    def get(self, request):
-        serializer = StudentSerializer(self.student)
-        return JsonResponse(serializer.data)
-
-    def post(self, request):
-        data = JSONParser().parse(request)
-        serializer = StudentSerializer(data=data)
-
-        # check if all the fields have been filled
-        # before saving to the database
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data)
-        return JsonResponse(serializer.errors,
-                            status=status.HTTP_400_BAD_REQUEST)
-'''
 
 
 class StudentName(generics.RetrieveUpdateDestroyAPIView):
