@@ -41,6 +41,56 @@ def api_root(request, format=None):
     })
 
 
+def watermark(data):
+    watermark_pdf = FPDF()
+    watermark_pdf.set_font('Helvetica', 'B', 20)
+    watermark_pdf.add_page()
+
+    # add token to pdf to be used as watermark
+    # set opacity to 0, so it's invisible
+    with watermark_pdf.local_context(fill_opacity=0.25):
+        watermark_pdf.text(x=50, y=50, text=data["student"])
+
+    with watermark_pdf.local_context(fill_opacity=0):
+        watermark_pdf.text(x=100, y=50, text=data["student"])
+    # save_watermark = BytesIO()
+    # save_to_folder = watermark_pdf.output(name=os.path.join(settings.MEDIA_ROOT,
+
+    # save the pdf to be used for watermarking as
+    # a bytestring in memory
+    watermark_byte_string = watermark_pdf.output(dest='S')
+    saved_watermark = BytesIO(watermark_byte_string)
+
+    # get the first page of the pdf to be used
+    # as a watermark
+    stamp = PdfReader(saved_watermark).pages[0]
+
+    # write to the uploaded pdf
+    writer = PdfWriter(clone_from=data["file"])
+    # reader = PdfReader(serializer.validated_data["file_path"])
+
+    # writer.append(reader, pages=reader.page)
+
+    # loop through the pages in the uploaded pdf
+    # and add the watermark to every page
+    for page in writer.pages:
+        page.merge_page(stamp, over=True)
+
+    # save the watermarked pdf to the media directory
+    # in the project
+    path = os.path.join(settings.MEDIA_ROOT,
+                        'watermark_' + data["file"].name)
+    writer.write(path)
+
+    data = {
+        "file_path": path,
+        "student": data["student"]
+    }
+
+    return Response(data=data,
+                    status=204)
+
+
 class StudentCreateView(CreateView):
     model = Student
     fields = ['name']
@@ -62,6 +112,14 @@ class FileUploadFormView(FormView):
     template_name = 'token_tome/file_form.html'
     success_url = 'create-student'
 
+    def form_valid(self, form):
+        data = {
+            'file': form.cleaned_data['file'],
+            'student': form.cleaned_data['student'].token
+        }
+        watermark(data)
+        return super(FileUploadFormView, self).form_valid(form)
+
 
 class StudentHighlight(generics.GenericAPIView):
     queryset = Student.objects.all()
@@ -81,56 +139,7 @@ class FileUploadView(generics.CreateAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
-
-            uploaded_file = serializer.validated_data["file_path"]
-
-            watermark_pdf = FPDF()
-            watermark_pdf.set_font('Helvetica', 'B', 20)
-            watermark_pdf.add_page()
-
-            # add token to pdf to be used as watermark
-            # set opacity to 0, so it's invisible
-            with watermark_pdf.local_context(fill_opacity=0.25):
-                watermark_pdf.text(x=50, y=50, text=serializer.validated_data["student"])
-
-            with watermark_pdf.local_context(fill_opacity=0):
-                watermark_pdf.text(x=100, y=50, text=serializer.validated_data["student"])
-            #save_watermark = BytesIO()
-            #save_to_folder = watermark_pdf.output(name=os.path.join(settings.MEDIA_ROOT,
-
-            # save the pdf to be used for watermarking as
-            # a bytestring in memory
-            watermark_byte_string = watermark_pdf.output(dest='S')
-            saved_watermark = BytesIO(watermark_byte_string)
-
-            # get the first page of the pdf to be used
-            # as a watermark
-            stamp = PdfReader(saved_watermark).pages[0]
-
-            # write to the uploaded pdf
-            writer = PdfWriter(clone_from=serializer.validated_data["file_path"])
-            #reader = PdfReader(serializer.validated_data["file_path"])
-
-            #writer.append(reader, pages=reader.page)
-
-            # loop through the pages in the uploaded pdf
-            # and add the watermark to every page
-            for page in writer.pages:
-                page.merge_page(stamp, over=True)
-
-            # save the watermarked pdf to the media directory
-            # in the project
-            path = os.path.join(settings.MEDIA_ROOT,
-                                'watermark_'+serializer.validated_data["file_path"].name)
-            writer.write(path)
-
-            data = {
-                "file_path": path,
-                "student": serializer.validated_data["student"]
-            }
-
-            return Response(data=data,
-                            status=204)
+            return watermark(serializer.validated_data)
 
         return Response(data=serializer.errors,
                         status=400)
