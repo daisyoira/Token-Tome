@@ -54,8 +54,7 @@ def watermark(data):
 
     with watermark_pdf.local_context(fill_opacity=0):
         watermark_pdf.text(x=100, y=50, text=data["student"])
-    # save_watermark = BytesIO()
-    # save_to_folder = watermark_pdf.output(name=os.path.join(settings.MEDIA_ROOT,
+
 
     # save the pdf to be used for watermarking as
     # a bytestring in memory
@@ -68,9 +67,6 @@ def watermark(data):
 
     # write to the uploaded pdf
     writer = PdfWriter(clone_from=data["file"])
-    # reader = PdfReader(serializer.validated_data["file_path"])
-
-    # writer.append(reader, pages=reader.page)
 
     # loop through the pages in the uploaded pdf
     # and add the watermark to every page
@@ -80,10 +76,13 @@ def watermark(data):
     # save the watermarked pdf to the media directory
     # in the project
     path = os.path.join(settings.MEDIA_ROOT,
-                        'watermark_' + data["file"].name)
+                        'encrypt_' + data["file"].name)
+
+    # encrypt/password protect the pdf
+    writer.encrypt(data["student"], algorithm='AES-256')
     writer.write(path)
 
-    file_name = 'watermark_'
+    file_name = 'encrypt_'
     no_ext = data["file"].name.split('.')[0]
     file_name += no_ext
 
