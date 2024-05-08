@@ -4,6 +4,14 @@ from rest_framework.test import APITestCase
 from token_tome.models import Student
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
+
+from django.test import LiveServerTestCase
+import time
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.wait import WebDriverWait
+
 #from io import BytesIO
 #from fpdf import FPDF
 
@@ -201,3 +209,66 @@ class FileUploadWithoutAuth(APITestCase):
         data = {}
         response = self.client.post(url, data, format='multipart')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+class PythonOrgSearch(LiveServerTestCase):
+    def setUp(self):
+        self.driver = webdriver.Edge()
+
+    def test_create_student_link(self):
+        self.driver.get("http://localhost:8000")
+        self.assertIn("Token Tome", self.driver.title)
+        elem = self.driver.find_element(By.LINK_TEXT, "create a new student?")
+        elem.send_keys(Keys.RETURN)
+        self.assertNotIn("No results found.", self.driver.page_source)
+        time.sleep(10)
+
+        self.driver.close()
+
+    def test_protect_file_link(self):
+        self.driver.get("http://localhost:8000/create-student")
+        self.assertIn("Token Tome", self.driver.title)
+        elem = self.driver.find_element(By.LINK_TEXT, "protect a file?")
+        #elem.send_keys("pycon")
+        elem.send_keys(Keys.RETURN)
+        self.assertNotIn("No results found.", self.driver.page_source)
+        time.sleep(10)
+
+        self.driver.close()
+
+    def test_student_form_complete(self):
+        self.driver.get("http://localhost:8000/create-student")
+        self.assertIn("Token Tome", self.driver.title)
+        elem = self.driver.find_element(By.XPATH, "//input[@name='name'][@type='text']")
+        elem.send_keys("Trevor")
+        elem.send_keys(Keys.RETURN)
+        elem = self.driver.find_element(By.TAG_NAME, "h2")
+        self.assertIn("Hello Trevor!", elem.text)
+        time.sleep(10)
+
+        self.driver.close()
+
+    def test_student_form_incomplete(self):
+        self.driver.get("http://localhost:8000/create-student")
+        self.assertIn("Token Tome", self.driver.title)
+        elem = self.driver.find_element(By.XPATH, "//input[@name='name'][@type='text']")
+        elem.send_keys(Keys.RETURN)
+
+        elem = self.driver.find_element(By.TAG_NAME, "h3")
+        self.assertEqual("Add a New Student", elem.text)
+        time.sleep(10)
+
+        self.driver.close()
+        
+    def test_file_form_incomplete(self):
+        self.driver.get("http://localhost:8000/")
+        self.assertIn("Token Tome", self.driver.title)
+        elem = self.driver.find_element(By.XPATH, "//input[@type='submit'][@value='Upload']")
+        elem.send_keys(Keys.RETURN)
+
+        elem = self.driver.find_element(By.TAG_NAME, "h3")
+        self.assertEqual("File Upload", elem.text)
+        time.sleep(10)
+
+        self.driver.close()
+
+
