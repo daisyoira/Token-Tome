@@ -15,13 +15,19 @@ class Student(models.Model):
         self.token = secrets.token_urlsafe(7)
         super(Student, self).save(*args, **kwargs)
 
+    class Meta:
+        managed = True
+
 
 class File(models.Model):
-    TOKEN_CHOICES = [(student.token, student.name) for student in Student.objects.all()]
+    try:
+        TOKEN_CHOICES = [(student.token, student.name) for student in Student.objects.all()]
+    except Exception:
+        TOKEN_CHOICES = []
     file = models.FileField()
     student = models.CharField(max_length=100,
                                choices=TOKEN_CHOICES,
-                               default=TOKEN_CHOICES[0])
+                               )
 
     # stop creation of table in database
     class Meta:
