@@ -20,10 +20,13 @@ class Student(models.Model):
 
 
 class File(models.Model):
+
+    TOKEN_CHOICES = []
     try:
         TOKEN_CHOICES = [(student.token, student.name) for student in Student.objects.all()]
-    except Exception:
+    except Exception as err:
         TOKEN_CHOICES = []
+
     file = models.FileField()
     student = models.CharField(max_length=100,
                                choices=TOKEN_CHOICES,
@@ -32,4 +35,5 @@ class File(models.Model):
     # stop creation of table in database
     class Meta:
         managed = False
+        db_table = 'file'
 

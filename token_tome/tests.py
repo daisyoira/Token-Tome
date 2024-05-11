@@ -1,16 +1,20 @@
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
-from token_tome.models import Student
+from token_tome.models import Student, File
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.conf import settings
 
+from django.db import connection
 from django.test import LiveServerTestCase
 import time
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.select import Select
 from faker import Faker
+import os
 
 
 class StudentTestsWithAuth(APITestCase):
@@ -110,16 +114,66 @@ class StudentTestsWithoutAuth(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
-
 class FileUploadWithAuth(APITestCase):
 
     def setUp(self):
+        super().setUp()
         self.username = 'daisy'
         self.password = 'daisy-secret'
         self.user = User.objects.create_user(username=self.username,
                                              password=self.password)
         self.client.login(username=self.username,
                           password=self.password)
+
+        with connection.schema_editor() as schema_editor:
+            in_atomic_block = schema_editor.connection.in_atomic_block
+            schema_editor.connection.in_atomic_block = False
+            try:
+                schema_editor.create_model(File)
+
+                if (
+                    File._meta.db_table
+                    not in connection.introspection.table_names()
+                ):
+                    raise ValueError(
+                        "Table `{table_name}` is missing in test database.".format(
+                            table_name=File._meta.db_table
+                        )
+                    )
+            finally:
+                schema_editor.connection.in_atomic_block = in_atomic_block
+
+
+
+    def test_upload_file_all_fields(self):
+        """
+        Ensure we can upload a file & token.
+
+        url = reverse('file_upload')
+        student = Student.objects.create(name='James Finn')
+
+        student = Student.objects.get()
+        print(student)
+
+        choices = File.objects.values('student')
+        print(choices)
+
+
+        path = os.path.join(settings.MEDIA_ROOT,
+                            'test.pdf')
+        local_file = open(path, 'rb')
+        # local_file.save('test_pdf.pdf', File(open('test_pdf.pdf', 'rb')))
+        # with open('test_pdf.pdf') as f1:
+        # SimpleUploadedFile(local_file.name, local_file.read(), content_type='application/pdf')
+        #data = {"student": student.token,
+        #        "file": (open(path, 'rb'))}
+        #files = {"file": SimpleUploadedFile(local_file.name, local_file.read(), content_type='application/pdf')}
+
+        #response = self.client.post(url, data)
+        #print(response.data)
+        #self.assertEqual(response.status_code, status.HTTP_200_OK)
+        """
+        pass
 
     def test_upload_file_missing_file(self):
         """
@@ -154,8 +208,13 @@ class FileUploadWithAuth(APITestCase):
         response = self.client.post(url, data, format='multipart')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-class FileUploadWithoutAuth(APITestCase):
+    def tearDown(self):
+        super().tearDown()
+        self.client.logout()
 
+
+
+class FileUploadWithoutAuth(APITestCase):
 
     def test_upload_file_all_fields(self):
         """
@@ -163,12 +222,10 @@ class FileUploadWithoutAuth(APITestCase):
         """
 
         url = reverse('file_upload')
-        local_file = SimpleUploadedFile("test_pdf.pdf",
-                                        b"file_content",
-                                        content_type="application/pdf")
-        #local_file.save('test_pdf.pdf', File(open('test_pdf.pdf', 'rb')))
-        #with open('test_pdf.pdf') as f1:
-        data = {'file': local_file,
+        path = os.path.join(settings.MEDIA_ROOT,
+                            'test.pdf')
+        local_file = open(path, 'rb')
+        data = {'file': (open(path, 'rb')),
                 'student': 'test_token'}
         response = self.client.post(url, data, format='multipart')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -258,6 +315,54 @@ class UserInterfaceTest(LiveServerTestCase):
 
         elem = self.driver.find_element(By.TAG_NAME, "h3")
         self.assertEqual("File Upload", elem.text)
+
+    def test_full_user_cycle(self):
+
+        self.driver.get("http://localhost:8000")
+        self.assertIn("Token Tome", self.driver.title)
+        elem = self.driver.find_element(By.LINK_TEXT, "create a new student?")
+        elem.send_keys(Keys.RETURN)
+
+        time.sleep(10)
+
+        elem = self.driver.find_element(By.TAG_NAME, "h3")
+        self.assertEqual("Add a New Student", elem.text)
+
+        elem = self.driver.find_element(By.XPATH, "//input[@name='name'][@type='text']")
+        name = Faker().name()
+        elem.send_keys(name)
+
+        time.sleep(10)
+
+        elem.send_keys(Keys.RETURN)
+        elem = self.driver.find_element(By.TAG_NAME, "h2")
+        self.assertIn(f"Hello {name}!", elem.text)
+
+
+        token = self.driver.find_element(By.TAG_NAME, "span")
+        elem = self.driver.find_element(By.LINK_TEXT, "protect a file?")
+        elem.send_keys(Keys.RETURN)
+        elem = self.driver.find_element(By.TAG_NAME, "h3")
+        self.assertIn("File Upload", elem.text)
+
+        time.sleep(10)
+
+        upload_file = os.path.join(settings.MEDIA_ROOT, 'test.pdf')
+        file_input = self.driver.find_element(By.CSS_SELECTOR, "input[type='file']")
+        file_input.send_keys(upload_file)
+
+        select_element = self.driver.find_element(By.NAME, 'student')
+        select = Select(select_element)
+        select.select_by_visible_text(name)
+
+        elem = self.driver.find_element(By.CSS_SELECTOR, "input[type='submit']")
+        time.sleep(10)
+        elem.send_keys(Keys.RETURN)
+
+        elem = self.driver.find_element(By.TAG_NAME, "p")
+        self.assertIn("Here's your file :)", elem.text)
+        elem = self.driver.find_element(By.LINK_TEXT, "open document")
+        elem.send_keys(Keys.RETURN)
 
     def tearDown(self):
         time.sleep(10)
