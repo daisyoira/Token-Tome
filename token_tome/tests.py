@@ -48,39 +48,17 @@ class StudentTestsWithAuth(APITestCase):
         response = self.client.post(url, data, format='multipart')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_create_student_missing_name_field(self):
-        """
-        Ensure we can create a new student object.
-        """
-
-        url = reverse('student-list')
-        data = {'institution': 'Test Institution'}
-        response = self.client.post(url, data, format='multipart')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-    def test_create_student_missing_institution_field(self):
-        """
-        Ensure we can create a new student object.
-        """
-        fake = Faker()
-        name = fake.name()
-        url = reverse('student-list')
-        data = {'name': name}
-        response = self.client.post(url, data, format='multipart')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
     def test_get_existing_student(self):
         """
         Ensure we can get a student record.
         """
-        fake = Faker()
-        name = fake.name()
-        student = Student.objects.create(name=name)
+        student = Student.objects.create(name='JAMES')
 
         url = reverse('student-detail', kwargs={'pk': 1})
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual({"name": response.data["name"]},
-                         { "name": name})
+                         { "name": "JAMES"})
     def test_get_non_existing_student(self):
         """
         Ensure we can't retrieve a non-existing
@@ -112,25 +90,6 @@ class StudentTestsWithoutAuth(APITestCase):
 
         url = reverse('student-list')
         data = {}
-        response = self.client.post(url, data, format='multipart')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-    def test_create_student_missing_name_field(self):
-        """
-        Ensure we can create a new student object.
-        """
-
-        url = reverse('student-list')
-        data = {'institution': 'Test Institution'}
-        response = self.client.post(url, data, format='multipart')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-    def test_create_student_missing_institution_field(self):
-        """
-        Ensure we can create a new student object.
-        """
-        fake = Faker()
-        name = fake.name()
-        url = reverse('student-list')
-        data = {'name': name}
         response = self.client.post(url, data, format='multipart')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 

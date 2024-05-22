@@ -3,16 +3,6 @@
     box-sizing: border-box;
 }
 
-table#student-table{
-    margin: 0 auto;
-    width: 100%;
-    table-layout: fixed;
-}
-
-tr {
-    text-align: center;
-}
-
 html{
     height: 100%;
 }
@@ -116,11 +106,3 @@ form>p>input, form>p>select{
     text-align: center;
     margin: 5px 10px;
 }
-
-
-
-
-/*th.student-name{
-    text-align: left;
-}*/
-

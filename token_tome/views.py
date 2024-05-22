@@ -1,7 +1,7 @@
 from django.http import HttpResponse
 from django.views.generic import DetailView, CreateView, FormView, TemplateView
 from django.conf import settings
-from django_filters.views import FilterView
+
 
 from rest_framework import generics
 from rest_framework import permissions, renderers
@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.parsers import MultiPartParser
 
-from token_tome.models import Student, File
+from token_tome.models import Student
 from django.contrib.auth.models import User
 from token_tome.serializers import StudentSerializer, UserSerializer, FileUploadSerializer
 from token_tome.forms import FileUploadForm
@@ -90,14 +90,10 @@ def watermark(data):
     return Response(data=data,
                     status=204)
 
-# Source: https://django-filter.readthedocs.io/en/main/guide/usage.html#the-filter
-class StudentListView(FilterView):
-    model = Student
-    filterset_fields = ['name','token','institution']
 
 class StudentCreateView(CreateView):
     model = Student
-    fields = '__all__'
+    fields = ['name']
 
     # get primary key and redirect to individual student
     # page
@@ -109,6 +105,7 @@ class StudentDetailView(DetailView):
     model = Student
     fields = '__all__'
     context_object_name = 'student'
+
 
 class FileUploadFormView(FormView):
     form_class = FileUploadForm

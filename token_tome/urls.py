@@ -1,13 +1,11 @@
 from django.urls import path, re_path
 from django.conf import settings
 from django.conf.urls.static import static
-from django_filters.views import FilterView
-from .models import Student
+
 from . import views
 
 urlpatterns = [
     path("", views.FileUploadFormView.as_view()),
-    path("list-student", views.StudentListView.as_view(), name="list-student"),
     path("create-student", views.StudentCreateView.as_view()),
     re_path("download/(?P<file_name>[-a-zA-Z0-9_]+)\\Z", views.FileDownloadView.as_view(), name='download'),
     path("student-token/<int:pk>", views.StudentDetailView.as_view(), name='student-token'),
