@@ -1,27 +1,23 @@
-from locust import HttpUser, TaskSet, task
+from locust import HttpUser, SequentialTaskSet, TaskSet, task, between
 from faker import Faker
 
-class UserActions(TaskSet):
-
-    def __init__(self):
-        super(UserActions, self).__init__()
-        self.csrf_token = None
-
-    def on_start(self):
-        response = self.client.get('/')
-        self.csrf_token = response.cookies['csrftoken']
-
+class UserActions(SequentialTaskSet):
+    # load test on the number of students that
+    # can be created simultaneously
     @task
     def create_students(self):
+        response = self.client.get("/create-student")
+        csrftoken = response.cookies['csrftoken']
+
         name = Faker().name()
-        self.client('/create-student', {'name': name}, headers={'X-CSRFToken': self.csrf_token})
+        self.client.post('/create-student',
+                         {'name': name},
+                         headers={"X-CSRFToken": csrftoken})
 
 class ApplicationUser(HttpUser):
-    # wait time between user requests
-    min_wait = 1
-    max_wait = 3
+    tasks = [UserActions]
+    host = 'http://localhost:8000'
 
-    @task
-    def create_students(self):
-        name = Faker().name()
-        self.client.get('/')
+    # wait time between user requests
+    # in seconds
+    wait_time = between(10, 20)
