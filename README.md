@@ -44,7 +44,6 @@ borrowed from the libraries.
 
 
 ### Installation
-#### Gradle
 
 1. Clone the repo.
    ```sh
@@ -76,6 +75,17 @@ by running the following commands in the following order.
 7. Proceed to [http://127.0.0.1:8000/](http://127.0.0.1:8000/) to use 
 the application.
 
+8. To check out the API documentation, use the api endpoint [http://127.0.0.1:8000/api](http://127.0.0.1:8000/api)
+
+9. With the server running, run all the tests in the test.py file using the following command
+   ```sh
+   python manage.py test
+   ```
+10. Run the load test with a variable number of concurrent users using the locust command.
+This provides a web interface where the total number of users can be specified. Provide the url http://localhost:8000
+   ```sh
+   locust 
+   ```
 <!-- CONTACT -->
 ## Contact
 
