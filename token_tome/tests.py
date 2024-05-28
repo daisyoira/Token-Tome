@@ -20,10 +20,14 @@ import os
 class StudentTestsWithAuth(APITestCase):
 
     def setUp(self):
-        self.username = 'daisy'
+        self.username = 'test'
         self.password = 'daisy-secret'
-        self.user = User.objects.create_user(username=self.username,
-                                             password=self.password)
+        try:
+            self.user = User.objects.create_user(username=self.username,
+                                                 password=self.password)
+        except Exception:
+            print('User already exists')
+
         self.client.login(username=self.username,
                           password=self.password)
     def test_create_student(self):
@@ -74,13 +78,15 @@ class StudentTestsWithAuth(APITestCase):
         """
         fake = Faker()
         name = fake.name()
-        student = Student.objects.create(name=name)
+        student = Student.objects.create(name=name, institution='Test Institution')
 
         url = reverse('student-detail', kwargs={'pk': 1})
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual({"name": response.data["name"]},
-                         { "name": name})
+        self.assertEqual({"name": response.data["name"],
+                          'institution': response.data["institution"]},
+                         { "name": name,
+                           'institution': 'Test Institution'})
     def test_get_non_existing_student(self):
         """
         Ensure we can't retrieve a non-existing
@@ -138,7 +144,9 @@ class StudentTestsWithoutAuth(APITestCase):
         """
         Ensure we can't get a student record.
         """
-        student = Student.objects.create(name='JAMES')
+        fake = Faker()
+        name = fake.name()
+        student = Student.objects.create(name=name, institution='Test Institution')
 
         url = reverse('student-detail', kwargs={'pk': 1})
         response = self.client.get(url)
@@ -161,29 +169,15 @@ class FileUploadWithAuth(APITestCase):
         super().setUp()
         self.username = 'daisy'
         self.password = 'daisy-secret'
-        self.user = User.objects.create_user(username=self.username,
-                                             password=self.password)
+        try:
+
+            self.user = User.objects.create_user(username=self.username,
+                                                 password=self.password)
+        except Exception:
+            print('User already exists')
+
         self.client.login(username=self.username,
                           password=self.password)
-
-        with connection.schema_editor() as schema_editor:
-            in_atomic_block = schema_editor.connection.in_atomic_block
-            schema_editor.connection.in_atomic_block = False
-            try:
-                schema_editor.create_model(File)
-
-                if (
-                    File._meta.db_table
-                    not in connection.introspection.table_names()
-                ):
-                    raise ValueError(
-                        "Table `{table_name}` is missing in test database.".format(
-                            table_name=File._meta.db_table
-                        )
-                    )
-            finally:
-                schema_editor.connection.in_atomic_block = in_atomic_block
-
 
 
     def test_upload_file_all_fields(self):
@@ -232,9 +226,11 @@ class FileUploadWithAuth(APITestCase):
         Ensure we can't upload a file without
         the student field.
         """
+        path = os.path.join(settings.MEDIA_ROOT,
+                            'test.pdf')
 
         url = reverse('file_upload')
-        data = {}
+        data = {'file': (open(path, 'rb'))}
         response = self.client.post(url, data, format='multipart')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -311,7 +307,7 @@ class UserInterfaceTest(LiveServerTestCase):
 
     def test_create_student_link(self):
         self.driver.get("http://localhost:8000")
-        self.assertIn("Token Tome", self.driver.title)
+        self.assertIn("LibID", self.driver.title)
         elem = self.driver.find_element(By.LINK_TEXT, "create a new student?")
         elem.send_keys(Keys.RETURN)
 
@@ -320,7 +316,7 @@ class UserInterfaceTest(LiveServerTestCase):
 
     def test_protect_file_link(self):
         self.driver.get("http://localhost:8000/create-student")
-        self.assertIn("Token Tome", self.driver.title)
+        self.assertIn("LibID", self.driver.title)
         elem = self.driver.find_element(By.LINK_TEXT, "protect a file?")
         #elem.send_keys("pycon")
         elem.send_keys(Keys.RETURN)
@@ -330,7 +326,7 @@ class UserInterfaceTest(LiveServerTestCase):
 
     def test_student_form_complete(self):
         self.driver.get("http://localhost:8000/create-student")
-        self.assertIn("Token Tome", self.driver.title)
+        self.assertIn("LibID", self.driver.title)
         elem = self.driver.find_element(By.XPATH, "//input[@name='name'][@type='text']")
 
         name = Faker().name()
@@ -341,7 +337,7 @@ class UserInterfaceTest(LiveServerTestCase):
 
     def test_student_form_incomplete(self):
         self.driver.get("http://localhost:8000/create-student")
-        self.assertIn("Token Tome", self.driver.title)
+        self.assertIn("LibID", self.driver.title)
         elem = self.driver.find_element(By.XPATH, "//input[@name='name'][@type='text']")
         elem.send_keys(Keys.RETURN)
 
@@ -350,7 +346,7 @@ class UserInterfaceTest(LiveServerTestCase):
         
     def test_file_form_incomplete(self):
         self.driver.get("http://localhost:8000/")
-        self.assertIn("Token Tome", self.driver.title)
+        self.assertIn("LibID", self.driver.title)
         elem = self.driver.find_element(By.XPATH, "//input[@type='submit'][@value='Upload']")
         elem.send_keys(Keys.RETURN)
 
@@ -360,7 +356,7 @@ class UserInterfaceTest(LiveServerTestCase):
     def test_full_user_cycle(self):
 
         self.driver.get("http://localhost:8000")
-        self.assertIn("Token Tome", self.driver.title)
+        self.assertIn("LibID", self.driver.title)
         elem = self.driver.find_element(By.LINK_TEXT, "create a new student?")
         elem.send_keys(Keys.RETURN)
 
